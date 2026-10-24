@@ -6,7 +6,11 @@ public class PlayerScript : MonoBehaviour
     //Declare variables
     public float playerSpeed;
     Rigidbody2D rb;
+    BoxCollider2D boxCollider2d;
     public float jumpForce;
+
+    [SerializeField] private LayerMask platformLayerMask;
+    
 
     //how long is player in the air
     private float jumpTime;
@@ -15,6 +19,8 @@ public class PlayerScript : MonoBehaviour
     
     private int jumping;
     private int onGround;
+    
+    Vector3 movement;
 
     public string nextLevel;
 
@@ -28,25 +34,32 @@ public class PlayerScript : MonoBehaviour
     {
         //Initialize variables
         rb = GetComponent<Rigidbody2D>();
+        boxCollider2d = GetComponent<BoxCollider2D>();
         jumping = 1;
         onGround = 1;
 
+
         initialPos = transform.position;
+        
        
     }
 
     // Update is called once per frame
     void Update()
     {
+
+        float moveHorizontal = Input.GetAxis("Horizontal");
+
+        //movement = new Vector3(moveHorizontal,  , 0);
         //check for inputs
+        rb.linearVelocity = new Vector2 (moveHorizontal * playerSpeed, rb.velocity.y);
         
-        transform.Translate(Input.GetAxis("Horizontal") * Time.deltaTime * playerSpeed, 0, 0);
 
         //when player presses space bar
         if (Input.GetKeyDown(KeyCode.Space))
         {
             //and character is not already jumping
-            if(onGround == 1) 
+            if(IsGrounded()) 
             {
                 //make jumping 0
                 onGround--;
@@ -55,7 +68,7 @@ public class PlayerScript : MonoBehaviour
                 //start counting jumpTime
                 jumpTime = 0;
 
-                Debug.Log("you cannot jump");
+                //Debug.Log("you cannot jump");
             }
             
         }   
@@ -69,8 +82,26 @@ public class PlayerScript : MonoBehaviour
         if(Input.GetKeyUp(KeyCode.Space) || jumpTime > buttonTime)
         {
             jumping = 1;
-            Debug.Log("jumping is false");
+            //Debug.Log("jumping is false");
         }
+    }
+
+    private bool IsGrounded() 
+    {
+        float extraHeightText = 1f;
+        RaycastHit2D raycastHit = Physics2D.BoxCast(boxCollider2d.bounds.center, boxCollider2d.bounds.size, 0f, Vector2.down, extraHeightText, platformLayerMask);
+        Color rayColor;
+        if(raycastHit.collider != null)
+        {
+            rayColor = Color.green;
+        }
+        else
+        {
+            rayColor = Color.red;
+        }
+        Debug.DrawRay(boxCollider2d.bounds.center, Vector2.down * (boxCollider2d.bounds.extents.y + extraHeightText));
+        Debug.Log(raycastHit.collider);
+        return raycastHit.collider != null;
     }
 
     void OnCollisionEnter2D (Collision2D otherObject) 
