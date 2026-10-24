@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerScript : MonoBehaviour
 {
@@ -10,9 +11,12 @@ public class PlayerScript : MonoBehaviour
     //how long is player in the air
     private float jumpTime;
 
+    private Vector3 initialPos;
     
     private int jumping;
     private int onGround;
+
+    public string nextLevel;
 
     //max time player can hold the button for
     public float buttonTime;
@@ -26,6 +30,8 @@ public class PlayerScript : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         jumping = 1;
         onGround = 1;
+
+        initialPos = transform.position;
        
     }
 
@@ -33,6 +39,7 @@ public class PlayerScript : MonoBehaviour
     void Update()
     {
         //check for inputs
+        
         transform.Translate(Input.GetAxis("Horizontal") * Time.deltaTime * playerSpeed, 0, 0);
 
         //when player presses space bar
@@ -72,6 +79,19 @@ public class PlayerScript : MonoBehaviour
         {
             onGround = 1;
             Debug.Log("Im on the floor");
+        }
+    }
+
+    void OnTriggerEnter2D (Collider2D otherObject)
+    {
+        if (otherObject.gameObject.CompareTag("death")) 
+        {
+            transform.position = initialPos;
+        }
+
+        if (otherObject.gameObject.CompareTag("Exit"))
+        {
+           SceneManager.LoadScene(nextLevel);
         }
     }
 }
