@@ -6,7 +6,8 @@ public class PlayerScript : MonoBehaviour
     //Declare variables
     public float playerSpeed;
     Rigidbody2D rb;
-    BoxCollider2D boxCollider2d;
+    CapsuleCollider2D boxCollider2d;
+    Animator animator;
     public float jumpForce;
 
     [SerializeField] private LayerMask platformLayerMask;
@@ -19,6 +20,8 @@ public class PlayerScript : MonoBehaviour
     
     private int jumping;
     private int onGround;
+    public bool isFacingLeft;
+    private Vector2 facingLeft;
     
     Vector3 movement;
 
@@ -34,11 +37,12 @@ public class PlayerScript : MonoBehaviour
     {
         //Initialize variables
         rb = GetComponent<Rigidbody2D>();
-        boxCollider2d = GetComponent<BoxCollider2D>();
+        boxCollider2d = GetComponent<CapsuleCollider2D>();
+        animator = GetComponent<Animator>();
         jumping = 1;
         onGround = 1;
 
-
+        facingLeft = new Vector2(-transform.localScale.x, transform.localScale.y);
         initialPos = transform.position;
         
        
@@ -50,9 +54,30 @@ public class PlayerScript : MonoBehaviour
 
         float moveHorizontal = Input.GetAxis("Horizontal");
 
+        if(moveHorizontal != 0) 
+        {
+            animator.SetFloat("speed", 0.5f);
+        }
+
+        if(moveHorizontal == 0)
+        {
+            animator.SetFloat("speed", 0);
+        }
+
         //movement = new Vector3(moveHorizontal,  , 0);
         //check for inputs
         rb.linearVelocity = new Vector2 (moveHorizontal * playerSpeed, rb.velocity.y);
+
+        if(moveHorizontal > 0 && isFacingLeft)
+        {
+            isFacingLeft = false;
+            Flip();
+        }
+        if(moveHorizontal < 0 && !isFacingLeft)
+        {
+            isFacingLeft = true;
+            Flip();
+        }
         
 
         //when player presses space bar
@@ -64,6 +89,7 @@ public class PlayerScript : MonoBehaviour
                 //make jumping 0
                 onGround--;
                 jumping--;
+                animator.SetBool("jumping", true);
 
                 //start counting jumpTime
                 jumpTime = 0;
@@ -89,7 +115,8 @@ public class PlayerScript : MonoBehaviour
     private bool IsGrounded() 
     {
         float extraHeightText = 1f;
-        RaycastHit2D raycastHit = Physics2D.BoxCast(boxCollider2d.bounds.center, boxCollider2d.bounds.size, 0f, Vector2.down, extraHeightText, platformLayerMask);
+        
+        RaycastHit2D raycastHit = Physics2D.CapsuleCast(boxCollider2d.bounds.center, boxCollider2d.bounds.size, CapsuleDirection2D.Vertical, 0f, Vector2.down, extraHeightText, platformLayerMask);
         Color rayColor;
         if(raycastHit.collider != null)
         {
@@ -101,6 +128,7 @@ public class PlayerScript : MonoBehaviour
         }
         Debug.DrawRay(boxCollider2d.bounds.center, Vector2.down * (boxCollider2d.bounds.extents.y + extraHeightText));
         Debug.Log(raycastHit.collider);
+        
         return raycastHit.collider != null;
     }
 
@@ -109,6 +137,7 @@ public class PlayerScript : MonoBehaviour
         if (otherObject.gameObject.CompareTag("floor"))
         {
             onGround = 1;
+            animator.SetBool("jumping", false);
             Debug.Log("Im on the floor");
         }
     }
@@ -125,4 +154,17 @@ public class PlayerScript : MonoBehaviour
            SceneManager.LoadScene(nextLevel);
         }
     }
+
+    protected void Flip()
+    {
+        if (isFacingLeft)
+        {
+        transform.localScale = facingLeft;
+        }
+        if (!isFacingLeft)
+        {
+            transform.localScale = new Vector2(-transform.localScale.x, transform.localScale.y);
+        }
+    }
+
 }

@@ -12,7 +12,6 @@ public class CameraFollow : MonoBehaviour
 
     void Start()
     {
-        offset = new Vector3 (8,2.5f,-1);
         fixedHeight = transform.position.y;
     }
 
