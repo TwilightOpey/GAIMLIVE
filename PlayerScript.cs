@@ -10,6 +10,8 @@ public class PlayerScript : MonoBehaviour
     Animator animator;
     public float jumpForce;
 
+    [SerializeField] GameObject deathScr;
+
     [SerializeField] private LayerMask platformLayerMask;
     
 
@@ -30,6 +32,8 @@ public class PlayerScript : MonoBehaviour
     //max time player can hold the button for
     public float buttonTime;
 
+    private float elapsedTime = 0.2f;
+
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -44,7 +48,6 @@ public class PlayerScript : MonoBehaviour
 
         facingLeft = new Vector2(-transform.localScale.x, transform.localScale.y);
         initialPos = transform.position;
-        
        
     }
 
@@ -114,7 +117,7 @@ public class PlayerScript : MonoBehaviour
 
     private bool IsGrounded() 
     {
-        float extraHeightText = 1f;
+        float extraHeightText = 0.5f;
         
         RaycastHit2D raycastHit = Physics2D.CapsuleCast(boxCollider2d.bounds.center, boxCollider2d.bounds.size, CapsuleDirection2D.Vertical, 0f, Vector2.down, extraHeightText, platformLayerMask);
         Color rayColor;
@@ -147,6 +150,8 @@ public class PlayerScript : MonoBehaviour
         if (otherObject.gameObject.CompareTag("death")) 
         {
             transform.position = initialPos;
+            deathScr.SetActive(true);   
+
         }
 
         if (otherObject.gameObject.CompareTag("Exit"))
