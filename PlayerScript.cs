@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class PlayerScript : MonoBehaviour
 {
@@ -7,6 +8,7 @@ public class PlayerScript : MonoBehaviour
     public float playerSpeed;
     Rigidbody2D rb;
     CapsuleCollider2D boxCollider2d;
+    AudioSource playerAudio;
     Animator animator;
     public float jumpForce;
 
@@ -32,7 +34,7 @@ public class PlayerScript : MonoBehaviour
     //max time player can hold the button for
     public float buttonTime;
 
-    private float elapsedTime = 0.2f;
+    private float timer = 0.2f;
 
 
 
@@ -43,6 +45,7 @@ public class PlayerScript : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         boxCollider2d = GetComponent<CapsuleCollider2D>();
         animator = GetComponent<Animator>();
+        playerAudio = GetComponent<AudioSource>();
         jumping = 1;
         onGround = 1;
 
@@ -150,7 +153,9 @@ public class PlayerScript : MonoBehaviour
         if (otherObject.gameObject.CompareTag("death")) 
         {
             transform.position = initialPos;
-            deathScr.SetActive(true);   
+            playerAudio.Play();
+              
+            StartCoroutine(ShowDeathScreenRoutine());
 
         }
 
@@ -171,5 +176,16 @@ public class PlayerScript : MonoBehaviour
             transform.localScale = new Vector2(-transform.localScale.x, transform.localScale.y);
         }
     }
+
+    private IEnumerator ShowDeathScreenRoutine()
+    {
+        if (deathScr != null)
+        {
+            deathScr.SetActive(true);
+            yield return new WaitForSeconds(timer);
+            deathScr.SetActive(false);
+        }
+    }
+
 
 }
