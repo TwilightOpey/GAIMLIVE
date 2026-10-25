@@ -28,10 +28,10 @@ public class CameraFollow : MonoBehaviour
         var width = height * _camera.aspect;
 
         var minX = Globals.WorldBounds.min.x + width;
-        var maxX = Globals.WorldBounds.extents.x - width;
+        var maxX = Globals.WorldBounds.max.x - width;
 
         var minY = Globals.WorldBounds.min.y + height;
-        var maxY = Globals.WorldBounds.extents.y - height;
+        var maxY = Globals.WorldBounds.max.y - height;
 
         camBounds = new Bounds();
         camBounds.SetMinMax(new Vector3(minX, minY, 0f), new Vector3 (maxX, maxY, 0));
@@ -44,17 +44,13 @@ public class CameraFollow : MonoBehaviour
 
         Vector3 smoothedPosition = Vector3.Lerp (transform.position, desiredPosition, smoothSpeed);
 
-        targetPos = smoothedPosition;
-        targetPos = GetCameraBounds();
-
-
         
 
-        transform.position = targetPos;
+        transform.position = GetCameraBounds(smoothedPosition);
         
     }
 
-    private Vector3 GetCameraBounds()
+    private Vector3 GetCameraBounds(Vector3 targetPos)
     {
         return new Vector3( 
             Mathf.Clamp(targetPos.x, camBounds.min.x, camBounds.max.x),
